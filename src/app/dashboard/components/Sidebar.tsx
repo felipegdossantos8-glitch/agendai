@@ -1,4 +1,4 @@
-"use "use client";
+"use client";
 
 import { useState } from "react";
 import Link from "next/link";
@@ -89,7 +89,7 @@ export default function Sidebar({ slug = "studio-espaco-beleza" }: { slug?: stri
           </nav>
         </div>
 
-        {/* Rodapé do Menu com Link do Cliente e Sair */}
+        {/* Rodapé do Menu com Link da Cliente e Sair */}
         <div className="space-y-2 pt-4 border-t border-slate-800">
           <a
             href={`/${slug}`}
@@ -97,7 +97,7 @@ export default function Sidebar({ slug = "studio-espaco-beleza" }: { slug?: stri
             rel="noopener noreferrer"
             className="flex items-center justify-between p-2.5 rounded-xl bg-pink-500/10 text-pink-400 text-xs font-bold hover:bg-pink-500/20 transition-all"
           >
-            <span>Ver Minha Pagina Pública</span>
+            <span>Ver Minha Página Pública</span>
             <ExternalLink size={14} />
           </a>
 

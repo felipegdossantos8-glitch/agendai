@@ -4,7 +4,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Calendar, Users, Scissors, DollarSign, User, LayoutDashboard, LogOut } from "lucide-react";
 
-export default function Sidebar() {
+interface SidebarProps {
+  slug?: string;
+}
+
+export default function Sidebar({ slug }: SidebarProps) {
   const pathname = usePathname();
 
   const menuItems = [

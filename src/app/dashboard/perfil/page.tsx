@@ -1,4 +1,4 @@
-"use "use client";
+"use client";
 
 import { useState } from "react";
 import { MapPin, Link as LinkIcon, Save, Copy, Check, Sparkles, Phone } from "lucide-react";

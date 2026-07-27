@@ -1,165 +1,80 @@
 "use client";
-import { useState, useEffect } from "react";
+
+import { useState } from "react";
 import Sidebar from "@/components/Sidebar";
+import { Calendar as CalendarIcon, Clock, CheckCircle2, MessageSquare, Plus } from "lucide-react";
 
-export default function DashboardPage() {
-  const [dataFiltro, setDataFiltro] = useState(new Date().toISOString().split("T")[0]);
-  const [horaInicio, setHoraInicio] = useState("08:00");
-  const [horaFim, setHoraFim] = useState("19:00");
-  const [modalAgendar, setModalAgendar] = useState(false);
+export default function PainelAgenda() {
+  const [dataInicio, setDataInicio] = useState("2026-07-27");
+  const [dataFim, setDataFim] = useState("2026-07-28");
 
-  // Estados para o novo agendamento (Item 9)
-  const [clientes, setClientes] = useState<{ id: string; nome: string; telefone: string }[]>([]);
-  const [clienteSelecionado, setClienteSelecionado] = useState("");
-  const [novoNome, setNovoNome] = useState("");
-  const [novoTelefone, setNovoTelefone] = useState("");
-  const [horarioAgendamento, setHorarioAgendamento] = useState("09:00");
+  const [agendamentos] = useState([
+    { id: "1", data: "2026-07-27", cliente: "Amanda Silva", servico: "Design de Sobrancelha", horario: "09:00", valor: 40.0, telefone: "5511988888888" },
+    { id: "2", data: "2026-07-27", cliente: "Carla Santos", servico: "Lash Lifting + Henna", horario: "10:30", valor: 180.0, telefone: "5511977777777" },
+    { id: "3", data: "2026-07-28", cliente: "Juliana Mendes", servico: "Manicure Tradicional", horario: "14:00", valor: 35.0, telefone: "5511966666666" },
+  ]);
 
-  useEffect(() => {
-    const c = localStorage.getItem("agendai_clientes");
-    if (c) setClientes(JSON.parse(c));
-  }, []);
-
-  const handleCriarAgendamento = () => {
-    let nomeFinal = novoNome;
-    let telFinal = novoTelefone;
-
-    if (clienteSelecionado !== "novo") {
-      const cli = clientes.find((x) => x.id === clienteSelecionado);
-      if (cli) {
-        nomeFinal = cli.nome;
-        telFinal = cli.telefone;
-      }
-    } else {
-      if (!novoNome || !novoTelefone) return alert("Preencha nome e telefone do novo cliente.");
-      // Cadastra novo cliente automaticamente
-      const novo = { id: Date.now().toString(), nome: novoNome, telefone: novoTelefone };
-      const listaAtualizada = [...clientes, novo];
-      setClientes(listaAtualizada);
-      localStorage.setItem("agendai_clientes", JSON.stringify(listaAtualizada));
-    }
-
-    alert(`Agendamento criado para ${nomeFinal} às ${horarioAgendamento}`);
-    setModalAgendar(false);
-  };
+  const agendamentosFiltrados = agendamentos.filter(
+    (a) => a.data >= dataInicio && a.data <= dataFim
+  );
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex min-h-screen bg-slate-100 text-slate-800">
       <Sidebar />
-      <main className="flex-1 p-8">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+      <main className="flex-1 p-4 md:p-8 overflow-y-auto max-w-4xl">
+        <header className="mb-6 flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-bold text-gray-800">Agenda do Dia</h1>
-            <p className="text-sm text-gray-500">Atendimentos programados</p>
+            <h1 className="text-xl font-bold text-slate-900">Agenda de Atendimentos 📅</h1>
+            <p className="text-xs text-slate-500">Filtrar consultas por período</p>
           </div>
-          <button
-            onClick={() => setModalAgendar(true)}
-            className="bg-pink-600 hover:bg-pink-700 text-white px-4 py-2 rounded-lg font-medium text-sm"
-          >
-            + Criar Agendamento
-          </button>
-        </div>
+        </header>
 
-        {/* Item 1: Filtros da Agenda com De - Até */}
-        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200 mb-6 flex flex-wrap items-center gap-4">
-          <div>
-            <label className="block text-xs font-semibold text-gray-500 mb-1">Data</label>
+        {/* Filtro por Intervalo: Data De - Até */}
+        <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm mb-6 flex flex-wrap items-center gap-3">
+          <div className="flex-1 min-w-[130px]">
+            <label className="block text-[11px] font-bold text-slate-500 mb-1">De (Data Inicial)</label>
             <input
               type="date"
-              value={dataFiltro}
-              onChange={(e) => setDataFiltro(e.target.value)}
-              className="p-2 border rounded-lg text-sm"
+              value={dataInicio}
+              onChange={(e) => setDataInicio(e.target.value)}
+              className="w-full p-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:border-pink-500"
             />
           </div>
-          <div>
-            <label className="block text-xs font-semibold text-gray-500 mb-1">De (Horário)</label>
+
+          <div className="flex-1 min-w-[130px]">
+            <label className="block text-[11px] font-bold text-slate-500 mb-1">Até (Data Final)</label>
             <input
-              type="time"
-              value={horaInicio}
-              onChange={(e) => setHoraInicio(e.target.value)}
-              className="p-2 border rounded-lg text-sm"
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-semibold text-gray-500 mb-1">Até (Horário)</label>
-            <input
-              type="time"
-              value={horaFim}
-              onChange={(e) => setHoraFim(e.target.value)}
-              className="p-2 border rounded-lg text-sm"
+              type="date"
+              value={dataFim}
+              onChange={(e) => setDataFim(e.target.value)}
+              className="w-full p-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:outline-none focus:border-pink-500"
             />
           </div>
         </div>
 
-        {/* Modal Item 9: Agendamento para cliente existente ou novo */}
-        {modalAgendar && (
-          <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-4">
-            <div className="bg-white rounded-xl p-6 w-full max-w-md space-y-4">
-              <h2 className="text-lg font-bold text-gray-800">Novo Agendamento</h2>
-              
-              <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">Cliente</label>
-                <select
-                  value={clienteSelecionado}
-                  onChange={(e) => setClienteSelecionado(e.target.value)}
-                  className="w-full p-2 border rounded-lg text-sm"
-                >
-                  <option value="">Selecione um cliente...</option>
-                  <option value="novo">+ Novo Cliente (Cadastrar na hora)</option>
-                  {clientes.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.nome} ({c.telefone})
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {clienteSelecionado === "novo" && (
-                <div className="space-y-2 border-l-2 border-pink-500 pl-3 my-2">
-                  <input
-                    type="text"
-                    placeholder="Nome do Novo Cliente"
-                    className="w-full p-2 border rounded-lg text-sm"
-                    value={novoNome}
-                    onChange={(e) => setNovoNome(e.target.value)}
-                  />
-                  <input
-                    type="text"
-                    placeholder="WhatsApp"
-                    className="w-full p-2 border rounded-lg text-sm"
-                    value={novoTelefone}
-                    onChange={(e) => setNovoTelefone(e.target.value)}
-                  />
-                </div>
-              )}
-
-              <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">Horário</label>
-                <input
-                  type="time"
-                  value={horarioAgendamento}
-                  onChange={(e) => setHorarioAgendamento(e.target.value)}
-                  className="w-full p-2 border rounded-lg text-sm"
-                />
-              </div>
-
-              <div className="flex justify-end gap-2 pt-2">
-                <button
-                  onClick={() => setModalAgendar(false)}
-                  className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg text-sm"
-                >
-                  Cancelar
-                </button>
-                <button
-                  onClick={handleCriarAgendamento}
-                  className="px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 text-sm"
-                >
-                  Confirmar Agendamento
-                </button>
-              </div>
+        {/* Lista de Atendimentos */}
+        <div className="space-y-3">
+          {agendamentosFiltrados.length === 0 ? (
+            <div className="text-center py-10 bg-white rounded-2xl border text-xs text-slate-400">
+              Nenhum agendamento encontrado no período selecionado.
             </div>
-          </div>
-        )}
+          ) : (
+            agendamentosFiltrados.map((item) => (
+              <div key={item.id} className="p-4 bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col gap-2">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <span className="text-[10px] font-bold text-pink-600 bg-pink-50 px-2 py-0.5 rounded-md inline-block mb-1">
+                      {item.data} às {item.horario}
+                    </span>
+                    <h3 className="font-bold text-sm text-slate-800">{item.cliente}</h3>
+                    <p className="text-xs text-slate-500">{item.servico}</p>
+                  </div>
+                  <span className="font-bold text-xs text-slate-700">R$ {item.valor.toFixed(2)}</span>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
       </main>
     </div>
   );

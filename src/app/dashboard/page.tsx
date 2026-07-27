@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { CheckCircle2, MessageSquare, Clock, Plus, Star, AlertTriangle, UserX, DollarSign, Calendar as CalendarIcon } from "lucide-react";
+import { CheckCircle2, MessageSquare, Clock, Plus, Star, AlertTriangle, UserX } from "lucide-react";
 import Link from "next/link";
+import Sidebar from "./components/Sidebar";
 
 const AGENDAMENTOS_HOJE_MOCK = [
   { id: "1", nomeCliente: "Amanda Silva", servico: "Design de Sobrancelha", horario: "09:00 - 09:30", preco: 40.0, status: "CONFIRMADO", telefone: "5511988888888" },
@@ -23,6 +24,13 @@ export default function PainelProfissional() {
     window.open(`https://wa.me/${telefone}?text=${encodeURIComponent(texto)}`, "_blank");
   };
 
+  const abrirModalFinalizacao = (item: any) => {
+    setTeveAtraso(false);
+    setNotaCliente(5);
+    setFaltou(false);
+    setModalAtendimento(item);
+  };
+
   const salvarFinalizacao = () => {
     setAgendamentos((prev) =>
       prev.map((item) =>
@@ -40,12 +48,16 @@ export default function PainelProfissional() {
 
   return (
     <div className="max-w-md mx-auto min-h-screen bg-slate-100 pb-24 text-slate-800">
-      {/* Topo do Painel */}
+      {/* Topo do Painel com Menu Lateral */}
       <div className="bg-slate-900 text-white p-5 rounded-b-2xl shadow-md">
         <div className="flex justify-between items-center mb-4">
-          <div>
-            <h1 className="text-lg font-bold">Agendai 👋</h1>
-            <p className="text-xs text-slate-400">Sua agenda de hoje</p>
+          <div className="flex items-center gap-2">
+            {/* Componente Sidebar Integrado */}
+            <Sidebar slug="studio-espaco-beleza" />
+            <div>
+              <h1 className="text-lg font-bold">Agendai 👋</h1>
+              <p className="text-xs text-slate-400">Sua agenda de hoje</p>
+            </div>
           </div>
           <div className="flex gap-2">
             <Link href="/dashboard/servicos" className="bg-slate-800 text-xs px-3 py-2 rounded-xl border border-slate-700 font-semibold">
@@ -57,6 +69,7 @@ export default function PainelProfissional() {
           </div>
         </div>
 
+        {/* Resumo do Caixa Diário */}
         <div className="bg-slate-800/80 rounded-xl p-3 flex justify-between items-center border border-slate-700">
           <div>
             <span className="text-xs text-slate-400 block">Concluído Hoje</span>
@@ -95,13 +108,13 @@ export default function PainelProfissional() {
                   <>
                     <button
                       onClick={() => enviarLembreteWhatsApp(item.telefone, item.nomeCliente, item.horario.split(" - ")[0])}
-                      className="flex-1 py-2 px-3 rounded-lg bg-emerald-50 text-emerald-700 font-semibold text-xs flex items-center justify-center gap-1"
+                      className="flex-1 py-2 px-3 rounded-lg bg-emerald-50 text-emerald-700 font-semibold text-xs flex items-center justify-center gap-1 hover:bg-emerald-100 transition-all"
                     >
                       <MessageSquare size={14} /> WhatsApp
                     </button>
                     <button
-                      onClick={() => setModalAtendimento(item)}
-                      className="flex-1 py-2 px-3 rounded-lg bg-pink-500 text-white font-semibold text-xs flex items-center justify-center gap-1 shadow-sm"
+                      onClick={() => abrirModalFinalizacao(item)}
+                      className="flex-1 py-2 px-3 rounded-lg bg-pink-500 text-white font-semibold text-xs flex items-center justify-center gap-1 shadow-sm hover:bg-pink-600 transition-all"
                     >
                       <CheckCircle2 size={14} /> Finalizar
                     </button>
@@ -120,14 +133,19 @@ export default function PainelProfissional() {
       {/* Modal de Pós-Atendimento & Qualificação da Cliente */}
       {modalAtendimento && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl p-5 w-full max-w-sm space-y-4">
+          <div className="bg-white rounded-2xl p-5 w-full max-w-sm space-y-4 shadow-xl">
             <h3 className="font-bold text-slate-900 text-base">Finalizar Atendimento</h3>
-            <p className="text-xs text-slate-500">Cliente: <strong>{modalAtendimento.nomeCliente}</strong></p>
+            <p className="text-xs text-slate-500">Cliente: <strong className="text-slate-800">{modalAtendimento.nomeCliente}</strong></p>
 
             <div className="space-y-3">
               {/* Opção No-Show */}
-              <label className="flex items-center gap-2 p-3 rounded-xl border border-slate-200 cursor-pointer">
-                <input type="checkbox" checked={faltou} onChange={(e) => setFaltou(e.target.checked)} className="rounded text-pink-500" />
+              <label className="flex items-center gap-2 p-3 rounded-xl border border-slate-200 cursor-pointer hover:bg-rose-50/50 transition-all">
+                <input
+                  type="checkbox"
+                  checked={faltou}
+                  onChange={(e) => setFaltou(e.target.checked)}
+                  className="rounded text-pink-500 focus:ring-pink-500 h-4 w-4"
+                />
                 <span className="text-xs font-bold text-rose-600 flex items-center gap-1">
                   <UserX size={14} /> Cliente NÃO compareceu (Falta)
                 </span>
@@ -136,8 +154,13 @@ export default function PainelProfissional() {
               {!faltou && (
                 <>
                   {/* Opção de Atraso */}
-                  <label className="flex items-center gap-2 p-3 rounded-xl border border-slate-200 cursor-pointer">
-                    <input type="checkbox" checked={teveAtraso} onChange={(e) => setTeveAtraso(e.target.checked)} className="rounded text-pink-500" />
+                  <label className="flex items-center gap-2 p-3 rounded-xl border border-slate-200 cursor-pointer hover:bg-amber-50/50 transition-all">
+                    <input
+                      type="checkbox"
+                      checked={teveAtraso}
+                      onChange={(e) => setTeveAtraso(e.target.checked)}
+                      className="rounded text-pink-500 focus:ring-pink-500 h-4 w-4"
+                    />
                     <span className="text-xs font-semibold text-slate-700 flex items-center gap-1">
                       <AlertTriangle size={14} className="text-amber-500" /> Teve atraso relevante?
                     </span>
@@ -146,10 +169,15 @@ export default function PainelProfissional() {
                   {/* Avaliação em Estrelas */}
                   <div>
                     <label className="text-xs font-bold text-slate-600 block mb-1">Qualificação da Cliente:</label>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 justify-center py-1 bg-slate-50 rounded-xl border border-slate-100">
                       {[1, 2, 3, 4, 5].map((star) => (
-                        <button key={star} onClick={() => setNotaCliente(star)} className="p-1">
-                          <Star size={22} className={star <= notaCliente ? "fill-amber-400 text-amber-400" : "text-slate-300"} />
+                        <button
+                          key={star}
+                          type="button"
+                          onClick={() => setNotaCliente(star)}
+                          className="p-1 hover:scale-110 transition-transform"
+                        >
+                          <Star size={24} className={star <= notaCliente ? "fill-amber-400 text-amber-400" : "text-slate-300"} />
                         </button>
                       ))}
                     </div>
@@ -159,8 +187,20 @@ export default function PainelProfissional() {
             </div>
 
             <div className="flex gap-2 pt-2">
-              <button onClick={() => setModalAtendimento(null)} className="flex-1 py-2.5 rounded-xl border text-xs font-bold text-slate-600">Cancelar</button>
-              <button onClick={salvarFinalizacao} className="flex-1 py-2.5 rounded-xl bg-pink-500 text-white text-xs font-bold shadow">Confirmar</button>
+              <button
+                type="button"
+                onClick={() => setModalAtendimento(null)}
+                className="flex-1 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 transition-all"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={salvarFinalizacao}
+                className="flex-1 py-2.5 rounded-xl bg-pink-500 text-white text-xs font-bold shadow hover:bg-pink-600 transition-all"
+              >
+                Confirmar
+              </button>
             </div>
           </div>
         </div>

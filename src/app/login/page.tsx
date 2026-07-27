@@ -1,11 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { User, Sparkles, Lock, Mail, ArrowRight, AlertCircle, CheckCircle2 } from "lucide-react";
 
 export default function TelaLogin() {
-  const router = useRouter();
   const [tipoConta, setTipoConta] = useState<"PROFISSIONAL" | "CLIENTE">("PROFISSIONAL");
   const [isCadastro, setIsCadastro] = useState(false);
 
@@ -14,7 +12,7 @@ export default function TelaLogin() {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
 
-  // Estados de Feedback de Validação
+  // Estados de Feedback
   const [erro, setErro] = useState("");
   const [sucesso, setSucesso] = useState("");
   const [carregando, setCarregando] = useState(false);
@@ -24,7 +22,7 @@ export default function TelaLogin() {
     setErro("");
     setSucesso("");
 
-    // Validações básicas de preenchimento
+    // Validação dos campos obrigatórios
     if (!email || !senha || (isCadastro && !nome)) {
       setErro("Por favor, preencha todos os campos obrigatórios.");
       return;
@@ -37,35 +35,43 @@ export default function TelaLogin() {
 
     setCarregando(true);
 
-    // Simulação do Login / Cadastro
     setTimeout(() => {
       setCarregando(false);
 
       if (isCadastro) {
+        // Grava o cookie de sessão para o Middleware liberar o acesso no servidor
+        document.cookie = "agendai_session=true; path=/; max-age=86400";
         setSucesso("Conta criada com sucesso! Redirecionando...");
+
         setTimeout(() => {
           if (tipoConta === "PROFISSIONAL") {
-            router.push("/dashboard/perfil");
+            window.location.href = "/dashboard/perfil";
           } else {
-            router.push("/studio-piloto");
+            window.location.href = "/studio-piloto";
           }
-        }, 1200);
+        }, 800);
       } else {
-        // Validação de teste de login
-        if (email.includes("@") && senha === "123456") {
-          setSucesso("Login realizado com sucesso!");
+        // Validação do Login
+        if (
+          (email === "piloto@agendai.com" && senha === "123456") ||
+          (email.includes("@") && senha === "123456")
+        ) {
+          // Grava o cookie de sessão para o Middleware liberar o acesso no servidor
+          document.cookie = "agendai_session=true; path=/; max-age=86400";
+          setSucesso("Login realizado com sucesso! Entrando...");
+
           setTimeout(() => {
             if (tipoConta === "PROFISSIONAL") {
-              router.push("/dashboard");
+              window.location.href = "/dashboard";
             } else {
-              router.push("/studio-piloto");
+              window.location.href = "/studio-piloto";
             }
-          }, 1000);
+          }, 800);
         } else {
-          setErro("E-mail ou senha incorretos. Tente novamente (Dica de teste: senha '123456').");
+          setErro("E-mail ou senha incorretos. (Dica de teste: use a senha '123456').");
         }
       }
-    }, 800);
+    }, 600);
   };
 
   return (

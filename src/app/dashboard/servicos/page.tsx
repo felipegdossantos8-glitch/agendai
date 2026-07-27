@@ -1,125 +1,175 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Copy, Check, Edit2, Trash2, Link as LinkIcon, Sparkles } from "lucide-react";
+import { Plus, Copy, Check, Edit2, Trash2, Sparkles, X } from "lucide-react";
+import Sidebar from "../components/Sidebar";
 
 export default function GestaoServicos() {
   const [copiado, setCopiado] = useState(false);
-  const [slug, setSlug] = useState("studio-espaco-beleza");
+  const [slug] = useState("studio-piloto");
   
   const [servicos, setServicos] = useState([
     { id: "1", nome: "Design de Sobrancelha Simples", duracao: 30, preco: 40.0, descricao: "Modelagem com pinça e alinhamento." },
     { id: "2", nome: "Design com Henna", duracao: 45, preco: 60.0, descricao: "Aplicação de henna com alta fixação." },
   ]);
 
-  const [novoServico, setNovoServico] = useState({ nome: "", duracao: 30, preco: 0, descricao: "" });
-  const [mostrarModal, setMostrarModal] = useState(false);
+  const [modalAberto, setModalAberto] = useState(false);
+  const [servicoEmEdicao, setServicoEmEdicao] = useState<any>(null);
 
-  const linkPersonalizado = `https://agendai.vercel.app/${slug}`;
+  const [nome, setNome] = useState("");
+  const [duracao, setDuracao] = useState(30);
+  const [preco, setPreco] = useState<number | string>("");
+  const [descricao, setDescricao] = useState("");
 
-  const copiarLink = () => {
-    navigator.clipboard.writeText(linkPersonalizado);
-    setCopiado(true);
-    setTimeout(() => setCopiado(false), 2000);
+  const abrirModalParaCriar = () => {
+    setServicoEmEdicao(null);
+    setNome("");
+    setDuracao(30);
+    setPreco("");
+    setDescricao("");
+    setModalAberto(true);
   };
 
-  const adicionarServico = () => {
-    if (!novoServico.nome || !novoServico.preco) return;
-    setServicos([...servicos, { ...novoServico, id: Date.now().toString() }]);
-    setNovoServico({ nome: "", duracao: 30, preco: 0, descricao: "" });
-    setMostrarModal(false);
+  const abrirModalParaEditar = (servico: any) => {
+    setServicoEmEdicao(servico);
+    setNome(servico.nome);
+    setDuracao(servico.duracao);
+    setPreco(servico.preco);
+    setDescricao(servico.descricao || "");
+    setModalAberto(true);
+  };
+
+  const salvarServico = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!nome || !preco) return;
+
+    const precoNum = typeof preco === "string" ? parseFloat(preco) : preco;
+
+    if (servicoEmEdicao) {
+      setServicos((prev) =>
+        prev.map((item) =>
+          item.id === servicoEmEdicao.id
+            ? { ...item, nome, duracao: Number(duracao), preco: precoNum, descricao }
+            : item
+        )
+      );
+    } else {
+      const novo = {
+        id: Date.now().toString(),
+        nome,
+        duracao: Number(duracao),
+        preco: precoNum,
+        descricao,
+      };
+      setServicos((prev) => [...prev, novo]);
+    }
+
+    setModalAberto(false);
+  };
+
+  const excluirServico = (id: string) => {
+    setServicos((prev) => prev.filter((item) => item.id !== id));
   };
 
   return (
-    <div className="max-w-md mx-auto min-h-screen bg-slate-50 p-4 pb-20 text-slate-800">
-      <header className="mb-6">
-        <h1 className="text-xl font-bold text-slate-900">Meus Serviços & Link 💅</h1>
-        <p className="text-xs text-slate-500">Configure o cardápio que suas clientes verão</p>
+    <div className="max-w-md mx-auto min-h-screen bg-slate-50 p-4 pb-24 text-slate-800">
+      {/* Header com Sidebar */}
+      <header className="flex items-center justify-between mb-6 bg-slate-900 text-white p-4 rounded-2xl shadow-sm">
+        <div className="flex items-center gap-3">
+          <Sidebar slug={slug} />
+          <div>
+            <h1 className="text-lg font-bold">Gerenciar Serviços 💅</h1>
+            <p className="text-xs text-slate-400">Cardápio do seu espaço</p>
+          </div>
+        </div>
+        <button
+          onClick={abrirModalParaCriar}
+          className="bg-pink-500 hover:bg-pink-600 text-white p-2 rounded-xl text-xs font-bold flex items-center gap-1 shadow"
+        >
+          <Plus size={16} /> Criar
+        </button>
       </header>
 
-      {/* Card do Link da Bio / WhatsApp */}
-      <div className="bg-gradient-to-r from-pink-500 to-rose-500 p-4 rounded-2xl text-white shadow-md mb-6">
-        <div className="flex items-center gap-2 mb-2">
-          <Sparkles size={18} />
-          <span className="font-bold text-sm">Seu Link de Agendamento</span>
-        </div>
-        <p className="text-xs text-pink-100 mb-3">Cole este link na Bio do seu Instagram e WhatsApp:</p>
-        <div className="bg-white/20 backdrop-blur-md p-2.5 rounded-xl flex items-center justify-between gap-2 border border-white/30 text-xs">
-          <span className="truncate font-mono">{linkPersonalizado}</span>
-          <button
-            onClick={copiarLink}
-            className="bg-white text-pink-600 px-3 py-1.5 rounded-lg font-bold flex items-center gap-1 shadow-sm hover:bg-pink-50 transition-all shrink-0"
-          >
-            {copiado ? <Check size={14} /> : <Copy size={14} />}
-            {copiado ? "Copiado!" : "Copiar"}
-          </button>
-        </div>
-      </div>
-
       {/* Lista de Serviços */}
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="font-bold text-slate-800">Serviços Cadastrados ({servicos.length})</h2>
-        <button
-          onClick={() => setMostrarModal(true)}
-          className="bg-pink-500 text-white px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 shadow-sm"
-        >
-          <Plus size={16} /> Criar Serviço
-        </button>
-      </div>
-
       <div className="space-y-3">
         {servicos.map((item) => (
           <div key={item.id} className="p-4 bg-white rounded-xl border border-slate-200 shadow-sm flex justify-between items-center">
             <div>
               <h3 className="font-bold text-slate-800 text-sm">{item.nome}</h3>
-              <p className="text-xs text-slate-500">{item.duracao} min • R$ {item.preco.toFixed(2)}</p>
+              <p className="text-xs text-slate-500">{item.duracao} min • R$ {Number(item.preco).toFixed(2)}</p>
               {item.descricao && <p className="text-xs text-slate-400 mt-1">{item.descricao}</p>}
             </div>
             <div className="flex items-center gap-2">
-              <button className="text-slate-400 hover:text-slate-600"><Edit2 size={16} /></button>
+              <button onClick={() => abrirModalParaEditar(item)} className="p-2 text-slate-500 hover:text-pink-500 rounded-lg hover:bg-slate-50">
+                <Edit2 size={16} />
+              </button>
+              <button onClick={() => excluirServico(item.id)} className="p-2 text-slate-400 hover:text-rose-500 rounded-lg hover:bg-slate-50">
+                <Trash2 size={16} />
+              </button>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Modal de Cadastro de Serviço */}
-      {mostrarModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl p-5 w-full max-w-sm space-y-4">
-            <h3 className="font-bold text-slate-900">Novo Serviço</h3>
+      {/* Modal de Criação/Edição */}
+      {modalAberto && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <form onSubmit={salvarServico} className="bg-white rounded-2xl p-5 w-full max-w-sm space-y-4 shadow-xl">
+            <div className="flex justify-between items-center">
+              <h3 className="font-bold text-slate-900">{servicoEmEdicao ? "Editar Serviço" : "Novo Serviço"}</h3>
+              <button type="button" onClick={() => setModalAberto(false)} className="text-slate-400"><X size={18} /></button>
+            </div>
+
             <input
               type="text"
-              placeholder="Nome do serviço (ex: Lash Lifting)"
-              value={novoServico.nome}
-              onChange={(e) => setNovoServico({ ...novoServico, nome: e.target.value })}
-              className="w-full p-3 rounded-xl border border-slate-200 text-sm"
+              placeholder="Nome do Serviço"
+              value={nome}
+              onChange={(e) => setNome(e.target.value)}
+              required
+              className="w-full p-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-pink-500"
             />
+
             <div className="grid grid-cols-2 gap-2">
-              <input
-                type="number"
-                placeholder="Preço (R$)"
-                onChange={(e) => setNovoServico({ ...novoServico, preco: parseFloat(e.target.value) })}
-                className="p-3 rounded-xl border border-slate-200 text-sm"
-              />
-              <input
-                type="number"
-                placeholder="Duração (min)"
-                value={novoServico.duracao}
-                onChange={(e) => setNovoServico({ ...novoServico, duracao: parseInt(e.target.value) })}
-                className="p-3 rounded-xl border border-slate-200 text-sm"
-              />
+              {/* Campo Preço com R$ fixo na frente */}
+              <div className="relative">
+                <span className="absolute left-3 top-3 text-sm text-slate-400 font-bold">R$</span>
+                <input
+                  type="number"
+                  step="0.01"
+                  placeholder="0,00"
+                  value={preco}
+                  onChange={(e) => setPreco(e.target.value)}
+                  required
+                  className="w-full p-3 pl-9 rounded-xl border border-slate-200 text-sm font-semibold focus:outline-none focus:border-pink-500"
+                />
+              </div>
+
+              {/* Campo Duração com 'min' no final */}
+              <div className="relative">
+                <input
+                  type="number"
+                  placeholder="30"
+                  value={duracao}
+                  onChange={(e) => setDuracao(Number(e.target.value))}
+                  required
+                  className="w-full p-3 pr-11 rounded-xl border border-slate-200 text-sm font-semibold focus:outline-none focus:border-pink-500"
+                />
+                <span className="absolute right-3 top-3 text-xs text-slate-400 font-bold">min</span>
+              </div>
             </div>
+
             <textarea
               placeholder="Descrição adicional (opcional)"
-              value={novoServico.descricao}
-              onChange={(e) => setNovoServico({ ...novoServico, descricao: e.target.value })}
-              className="w-full p-3 rounded-xl border border-slate-200 text-sm h-20"
+              value={descricao}
+              onChange={(e) => setDescricao(e.target.value)}
+              className="w-full p-3 rounded-xl border border-slate-200 text-sm h-20 focus:outline-none focus:border-pink-500"
             />
+
             <div className="flex gap-2">
-              <button onClick={() => setMostrarModal(false)} className="flex-1 py-2.5 rounded-xl border text-sm font-bold text-slate-600">Cancelar</button>
-              <button onClick={adicionarServico} className="flex-1 py-2.5 rounded-xl bg-pink-500 text-white text-sm font-bold shadow">Salvar</button>
+              <button type="button" onClick={() => setModalAberto(false)} className="flex-1 py-2.5 rounded-xl border text-xs font-bold text-slate-600">Cancelar</button>
+              <button type="submit" className="flex-1 py-2.5 rounded-xl bg-pink-500 text-white text-xs font-bold shadow">Salvar</button>
             </div>
-          </div>
+          </form>
         </div>
       )}
     </div>

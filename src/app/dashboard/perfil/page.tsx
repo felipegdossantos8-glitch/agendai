@@ -46,7 +46,7 @@ export default function PerfilProfissional() {
     <div className="max-w-md mx-auto min-h-screen bg-slate-50 p-4 pb-24 text-slate-800">
       {/* Header com Sidebar */}
       <header className="flex items-center gap-3 mb-6 bg-slate-900 text-white p-4 rounded-2xl shadow-sm">
-        <Sidebar slug={formData.slug} />
+        <Sidebar />
         <div>
           <h1 className="text-lg font-bold">Perfil do Espaço ⚙️</h1>
           <p className="text-xs text-slate-400">Dados do studio e link oficial</p>

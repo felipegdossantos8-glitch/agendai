@@ -76,7 +76,7 @@ export default function GestaoServicos() {
       {/* Header com Sidebar */}
       <header className="flex items-center justify-between mb-6 bg-slate-900 text-white p-4 rounded-2xl shadow-sm">
         <div className="flex items-center gap-3">
-          <Sidebar slug={slug} />
+          <Sidebar />
           <div>
             <h1 className="text-lg font-bold">Gerenciar Serviços 💅</h1>
             <p className="text-xs text-slate-400">Cardápio do seu espaço</p>
